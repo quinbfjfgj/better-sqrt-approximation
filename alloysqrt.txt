@@ -1,0 +1,8 @@
+pub inline fn alloysqrt(x: f32) f32 {
+    const ix: u32 = @bitCast(x);
+    const ntr: u32 = ix >> 1;
+    const pos: f32 = @bitCast(532647112 + ntr); //initial guess x^0.5
+    const neg: f32 = @bitCast(1588540722 - ntr); //directly hack x^-0.5 instead of 1/x^0.5
+    const res = pos * pos - x;
+    return pos - neg * res; //one iteration, 0.023% max error
+}
