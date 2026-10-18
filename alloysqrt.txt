@@ -1,8 +1,10 @@
 pub inline fn alloysqrt(x: f32) f32 {
+    @setFloatMode(.optimized); //probably not necessary but apparently it is more likely for the last two lines to compile into an fma if i enable this flag
     const ix: u32 = @bitCast(x);
     const ntr: u32 = ix >> 1;
+    const neg: f32 = @bitCast(2147483648 + ix); //it's just -x this might be inefficient but it's neater idk more chance for fma or something
     const pos: f32 = @bitCast(532647112 + ntr); //initial guess x^0.5
-    const neg: f32 = @bitCast(1588540722 - ntr); //directly hack x^-0.5 instead of 1/x^0.5
-    const res = pos * pos - x;
-    return pos - neg * res; //one iteration, 0.023% max error
-}
+    const aux: f32 = @bitCast(3736024371 - ntr); //directly hack -0.5 * x^-0.5
+    const res = pos * pos + neg; //hopefully both of these last two lines compile into fma
+    return aux * res + pos; //one iteration, 0.023% max error, these constants are optimal for minimum maximum relative error plusminus one. error repeats every power of four
+} //heads up: denormals will return garbage outputs, negative inputs might crash (integer overflow), and special cases will also probably crash idk
